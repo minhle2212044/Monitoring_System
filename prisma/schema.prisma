@@ -18,9 +18,58 @@ model User {
   name      String
   address   String
   dob       DateTime
-  gender    String
+  sex       String
   email     String    @unique
-  tel     String
+  tel       String
   password  String
   role      String     @default("CUSTOMER")
+  accessToken  String?
+
+  devices   Device[]
+  notices   Notice[]
+}
+
+model Device {
+  id        Int       @id @default(autoincrement())
+  name      String
+  address   String
+  type      String
+  deviceId  String     @unique
+  token     String
+  userId    Int
+
+  user      User      @relation(fields: [userId], references: [id])
+  data      Data[]
+}
+
+model Data {
+  id        Int       @id @default(autoincrement())
+  time      DateTime
+  type      String
+  data      Float
+  unit      String
+
+  deviceId  Int
+  device    Device    @relation(fields: [deviceId], references: [id])
+}
+
+model Notice {
+  id        Int       @id @default(autoincrement())
+  time      DateTime
+  message   String
+  userId    Int
+
+  user      User      @relation(fields: [userId], references: [id])
+}
+
+model Activity {
+  id          Int       @id @default(autoincrement())
+  suggestion  String
+  priority    String
+  temp_max    Float
+  temp_min    Float
+  humid_max   Float
+  humid_min   Float
+  co2         Float
+  pm25        Float
 }
