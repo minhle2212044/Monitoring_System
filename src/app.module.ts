@@ -6,13 +6,15 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { CoreiotModule } from './coreiot/coreiot.module';
 import { AuthModule } from './auth/auth.module';
+import { NoticeModule } from './notice/notice.module';
+import { ActivityModule } from './activity/activity.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    PrismaModule, UserModule, CoreiotModule, AuthModule],
+    PrismaModule, UserModule, CoreiotModule, AuthModule, NoticeModule, ActivityModule],
   controllers: [AppController],
   providers: [AppService],
 })

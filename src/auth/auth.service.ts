@@ -6,6 +6,7 @@ import { HttpService } from '@nestjs/axios';
 import * as bcrypt from 'bcrypt';
 import { lastValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
+import { CoreIotService } from 'src/coreiot/coreiot.service';
 import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
@@ -16,6 +17,7 @@ export class AuthService {
     private jwt: JwtService,
     private config: ConfigService,
     private httpService: HttpService,
+    private readonly coreIotService: CoreIotService
   ) {}
 
   async signup(dto: AuthDto) {
@@ -76,11 +78,12 @@ export class AuthService {
             ),
         );
         coreIotToken = coreRes.data?.token || '';
-        console.log('Đăng nhập vào CoreIoT thành công:', coreIotToken);
     } catch (error) {
         console.warn('Không thể đăng nhập vào CoreIoT:', error.message);
     }
 
+    await this.coreIotService.connectForUser(user.id);
+    
     const token = await this.signToken(user.id, user.email);
     const refresh_token = await this.refreshToken(user.id, user.email);
 
