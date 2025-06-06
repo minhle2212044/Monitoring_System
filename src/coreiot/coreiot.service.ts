@@ -100,6 +100,7 @@ export class CoreIotService implements OnModuleDestroy {
   }
 
   async fetchLatestTelemetryForUser(userId: number, coreiotToken: string) {
+    console.log(`Fetching latest telemetry for user ${userId}...`);
     const devices = await this.prisma.device.findMany({
       where: { userId },
       select: { id: true, deviceId: true, token: true }

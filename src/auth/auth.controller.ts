@@ -57,11 +57,4 @@ export class AuthController {
         return this.authService.verifyToken(token);
     }
 
-    @Patch('change-password')
-    async changePassword(
-        @Body() body: { userId: number; oldPassword: string; newPassword: string }
-    ) {
-        const { userId, oldPassword, newPassword } = body;
-        return this.authService.changePassword(Number(userId), oldPassword, newPassword);
-    }
 }

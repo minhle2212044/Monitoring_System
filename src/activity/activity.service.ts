@@ -46,7 +46,7 @@ export class ActivityService {
       });
       if (entry) latestData[type] = entry.data;
     }
-
+    console.log('Latest sensor data:', latestData);
     // So sánh dữ liệu với điều kiện của activity để lấy các hoạt động phù hợp
     const activities = await this.prisma.activity.findMany();
 

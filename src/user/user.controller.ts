@@ -1,8 +1,10 @@
-import { Controller, Get, Param, Put, Body, Delete, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Param, Put, Body, Delete, UseGuards,ParseIntPipe, Patch } from '@nestjs/common';
 import { UserService } from './user.service';
+import { JwtGuard } from '../auth/guard';
 import { User } from '@prisma/client';
 
-@Controller('user')
+@UseGuards(JwtGuard)
+@Controller('api/v1/user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -27,5 +29,13 @@ export class UserController {
   @Get()
   async getAllUsers(): Promise<User[]> {
     return this.userService.getAllUsers();
+  }
+
+  @Patch('change-password')
+  async changePassword(
+      @Body() body: { userId: number; oldPassword: string; newPassword: string }
+  ) {
+      const { userId, oldPassword, newPassword } = body;
+      return this.userService.changePassword(Number(userId), oldPassword, newPassword);
   }
 }
