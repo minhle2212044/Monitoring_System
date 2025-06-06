@@ -2,15 +2,51 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as mqtt from 'mqtt';
 import { HttpService } from '@nestjs/axios';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, interval, Subscription } from 'rxjs';
+
+interface TelemetryData {
+  id: number;
+  type: string;
+  deviceId: number;
+  data: number;
+  time: Date;
+  unit: string;
+}
+
+export interface DeviceData {
+  deviceId: string;
+  data: TelemetryData[];
+}
 
 @Injectable()
 export class CoreIotService implements OnModuleDestroy {
   private clients: Map<number, mqtt.MqttClient> = new Map();
   private MQTT_BROKER = 'mqtt://app.coreiot.io';
   private port = 1883;
+  private pollingSubscription: Subscription | null = null;
 
   constructor(private readonly prisma: PrismaService, private readonly httpService: HttpService,) {}
+
+  async startPollingTelemetry(userId: number, coreiotToken: string, intervalMs = 20000) {
+    if (this.pollingSubscription) {
+      console.log('Telemetry polling already running');
+      return;
+    }
+
+    this.pollingSubscription = interval(intervalMs).subscribe(() => {
+      this.fetchLatestTelemetryForUser(userId, coreiotToken);
+    });
+
+    console.log(`Started telemetry polling for user ${userId}`);
+  }
+
+  stopPollingTelemetry() {
+    if (this.pollingSubscription) {
+      this.pollingSubscription.unsubscribe();
+      this.pollingSubscription = null;
+      console.log('Stopped telemetry polling');
+    }
+  }
 
   async connectForUser(userId: number) {
     const devices = await this.prisma.device.findMany({
@@ -78,7 +114,9 @@ export class CoreIotService implements OnModuleDestroy {
       { key: 'humidity', unit: '%' },
       { key: 'CO2', unit: 'ppm' },
       { key: 'PM25', unit: 'µg/m³' },
+      { key: 'light', unit: 'lux' },
     ];
+    const results: { deviceId: string; telemetry: { type: string; value: number; time: number; unit: string }[] }[] = [];
 
     for (const device of devices) {
       try {
@@ -95,6 +133,8 @@ export class CoreIotService implements OnModuleDestroy {
         );
 
         const telemetry = response.data;
+        const savedFields: { type: string; value: number; time: number; unit: string }[] = [];
+
         console.log(`Fetched telemetry for device ${device.deviceId}:`, telemetry);
 
         for (const field of fieldsToSave) {
@@ -109,14 +149,43 @@ export class CoreIotService implements OnModuleDestroy {
                 unit: field.unit,
               },
             });
+            savedFields.push({ type: field.key, value: parseFloat(entry.value), time: entry.ts, unit: field.unit });
           }
         }
-
+        results.push({ deviceId: device.deviceId, telemetry: savedFields });
         console.log(`Saved telemetry for device ${device.deviceId}`);
       } catch (error) {
         console.error(`Error fetching telemetry for device ${device.deviceId}:`, error.message);
       }
     }
+  }
+
+  async getSensorDataFromDb(userId: number): Promise<DeviceData[]> {
+    const devices = await this.prisma.device.findMany({
+      where: { userId },
+      select: { id: true, deviceId: true }
+    });
+
+    if (!devices.length) return [];
+
+    const result: DeviceData[] = [];
+
+    for (const device of devices) {
+      const types = ['temperature', 'humidity', 'CO2', 'PM25', 'light'];
+      const latestData: TelemetryData[] = [];
+
+      for (const type of types) {
+        const data = await this.prisma.data.findFirst({
+          where: { deviceId: device.id, type },
+          orderBy: { time: 'desc' },
+        });
+        if (data) latestData.push(data);
+      }
+
+      result.push({ deviceId: device.deviceId, data: latestData });
+    }
+
+    return result;
   }
 
   async sendTelemetry(deviceId: number, data: any): Promise<any> {
@@ -145,5 +214,6 @@ export class CoreIotService implements OnModuleDestroy {
   onModuleDestroy() {
     this.clients.forEach((client) => client.end());
     this.clients.clear();
+    this.stopPollingTelemetry();
   }
 }

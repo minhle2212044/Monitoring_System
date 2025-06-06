@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Param, ParseIntPipe, Get, Query} from '@nestjs/common';
-import { CoreIotService } from './coreiot.service';
+import { CoreIotService, DeviceData } from './coreiot.service';
 
 @Controller('coreiot')
 export class CoreIotController {
@@ -15,4 +15,8 @@ export class CoreIotController {
     return await this.coreIotService.sendTelemetry(id, body);
   }
   
+  @Get('data/:id')
+  async getTelementry(@Param('id', ParseIntPipe) id: number): Promise<DeviceData[]>  {
+    return await this.coreIotService.getSensorDataFromDb(id);
+  }
 }

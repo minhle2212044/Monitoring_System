@@ -8,13 +8,14 @@ import { CoreiotModule } from './coreiot/coreiot.module';
 import { AuthModule } from './auth/auth.module';
 import { NoticeModule } from './notice/notice.module';
 import { ActivityModule } from './activity/activity.module';
+import { HistoryModule } from './history/history.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    PrismaModule, UserModule, CoreiotModule, AuthModule, NoticeModule, ActivityModule],
+    PrismaModule, UserModule, CoreiotModule, AuthModule, NoticeModule, ActivityModule, HistoryModule],
   controllers: [AppController],
   providers: [AppService],
 })

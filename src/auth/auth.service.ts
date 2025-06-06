@@ -83,7 +83,9 @@ export class AuthService {
     }
 
     await this.coreIotService.connectForUser(user.id);
-    
+    if (coreIotToken) {
+      await this.coreIotService.startPollingTelemetry(user.id, coreIotToken);
+    }
     const token = await this.signToken(user.id, user.email);
     const refresh_token = await this.refreshToken(user.id, user.email);
 
@@ -95,6 +97,18 @@ export class AuthService {
       message: 'Login successful',
     };
   }
+
+  async signout(userId: number): Promise<{ message: string }> {
+    this.coreIotService.stopPollingTelemetry();
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { accessToken: null },
+    });
+
+    return { message: 'Logout successful' };
+  }
+
 
   async signToken(
     userId: number,

@@ -30,6 +30,11 @@ export class AuthController {
         return this.authService.signin(dto);
     }
 
+    @Post('signin')
+    async signout(@Body('userId') userId: number) {
+        return this.authService.signout(userId);
+    }
+
     @HttpCode(HttpStatus.OK)
     @Post('refresh-token')
     async refreshToken(@Body() dto: RefreshTokenDto) {
