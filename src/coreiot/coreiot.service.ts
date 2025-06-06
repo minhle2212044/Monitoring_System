@@ -1,5 +1,6 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { NoticeService } from '../notice/notice.service';
 import * as mqtt from 'mqtt';
 import { HttpService } from '@nestjs/axios';
 import { lastValueFrom, interval, Subscription } from 'rxjs';
@@ -25,7 +26,7 @@ export class CoreIotService implements OnModuleDestroy {
   private port = 1883;
   private pollingSubscription: Subscription | null = null;
 
-  constructor(private readonly prisma: PrismaService, private readonly httpService: HttpService,) {}
+  constructor(private readonly prisma: PrismaService, private readonly httpService: HttpService, private readonly noticeService: NoticeService) {}
 
   async startPollingTelemetry(userId: number, coreiotToken: string, intervalMs = 20000) {
     if (this.pollingSubscription) {
@@ -140,15 +141,35 @@ export class CoreIotService implements OnModuleDestroy {
         for (const field of fieldsToSave) {
           const entry = telemetry[field.key]?.[0];
           if (entry) {
+            const value = parseFloat(entry.value);
             await this.prisma.data.create({
               data: {
                 deviceId: device.id,
                 time: new Date(entry.ts),
                 type: field.key,
-                data: parseFloat(entry.value),
+                data: value,
                 unit: field.unit,
               },
             });
+            if (['CO2', 'PM25', 'temperature'].includes(field.key)) {
+              const lastNotice = await this.prisma.notice.findFirst({
+                where: {
+                  userId,
+                  message: { contains: field.key },
+                },
+                orderBy: { time: 'desc' },
+              });
+
+              const now = Date.now();
+              const lastTime = lastNotice?.time?.getTime() || 0;
+              const diffMinutes = (now - lastTime) / 60000;
+
+              if (diffMinutes >= 30) {
+                await this.noticeService.createWarningNoticeIfNeeded(userId, field.key, value);
+              } else {
+                console.log(`⏳ Skip notice for ${field.key}, only ${diffMinutes.toFixed(1)} minutes passed.`);
+              }
+            }
             savedFields.push({ type: field.key, value: parseFloat(entry.value), time: entry.ts, unit: field.unit });
           }
         }
