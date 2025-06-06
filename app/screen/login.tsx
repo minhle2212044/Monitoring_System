@@ -8,32 +8,34 @@ import { useRouter } from 'expo-router';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 export default function LoginScreen() {
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [secureText, setSecureText] = useState(true);
   
   const router = useRouter();
 
   const handleLogin = async () => {
-    if (!phoneNumber || !password) {
+    if (!email || !password) {
       Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin!');
       return;
     }
 
     try {
       const response = await axiosInstance.post(API_ENDPOINTS.AUTH.LOGIN, {
-        tel: phoneNumber,
+        email: email,
         password: password,
       });
 
-    const { access_token, refresh_token, user } = response.data;
+    const { access_token, refresh_token, coreiot_token, user } = response.data;
 
     await AsyncStorage.setItem('access_token', access_token);
     await AsyncStorage.setItem('refresh_token', refresh_token);
+    await AsyncStorage.setItem('coreiot_token', coreiot_token);
+    await AsyncStorage.setItem('user_id', String(user));
     await AsyncStorage.setItem('user_id', user.toString());
 
     Alert.alert('Thành công', 'Đăng nhập thành công!');
-    router.push('/screen/homepage');
+    router.push('/screen/home');
   } catch (error: any) {
     console.error('Login error:', error?.response?.data || error.message);
     Alert.alert('Đăng nhập thất bại', error?.response?.data?.message || 'Đã có lỗi xảy ra');
@@ -55,15 +57,17 @@ export default function LoginScreen() {
                 resizeMode="contain"
             />
 
+            <Text style={styles.appTitle}>Monitoring System</Text>
+
             <View style={styles.inputContainer}>
                 <Icon name="phone" size={20} color="#34A262" style={styles.icon} />
                 <TextInput
                 style={styles.input}
-                placeholder="Số điện thoại"
+                placeholder="Email"
                 placeholderTextColor="#999"
-                value={phoneNumber}
-                onChangeText={setPhoneNumber}
-                keyboardType="phone-pad"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
                 autoCapitalize="none"
                 />
             </View>
@@ -97,16 +101,10 @@ export default function LoginScreen() {
             <Text style={styles.linkText2}>LIÊN HỆ</Text>
             <View style={styles.emailRow}>
                 <Icon name="envelope" size={20} color="#34A262" style={styles.emailIcon} />
-                <Text style={styles.email}>recycleapp@gmail.com</Text>
+                <Text style={styles.email}>minh.le2212044@hcmut.edu.vn</Text>
             </View>
             </View>
 
-            {/* Footer image here */}
-            <Image
-            source={require('../../assets/images/footer.png')} // change to your actual image
-            style={styles.footerImage}
-            resizeMode="contain"
-            />
         </View>
         </TouchableWithoutFeedback>
 
@@ -200,6 +198,11 @@ const styles = StyleSheet.create({
     width: '100%',
     alignSelf: 'center',
   },
-  
-  
+  appTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#34A262',
+    marginBottom: 30,
+    textAlign: 'center',
+  },
 });

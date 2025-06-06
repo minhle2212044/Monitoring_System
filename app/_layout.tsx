@@ -25,31 +25,27 @@ export default function Layout() {
             }}
           />
           <Stack.Screen
+            name="screen/login"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
             name="screen/register"
             options={{
               headerShown: false,
             }}
           />
           <Stack.Screen
-            name="screen/account"
+            name="screen/home"
             options={{
-              headerShown: true,
-              title: "TÀI KHOẢN CỦA TÔI",
-              headerStyle: {
-                elevation: 0,
-                shadowOpacity: 0,
-              },
-              headerTitleAlign: 'center',
-              headerTitleStyle: {
-                fontSize: 18,
-                color: '#000000',
-              },
-              headerTintColor: '#067F38',
-              headerLeft: () => (
-                <TouchableOpacity onPress={() => router.back()}>
-                  <Icon name="chevron-left" size={20} color="#067F38" style={{ marginLeft: 10 }} />
-                </TouchableOpacity>
-              ),
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="screen/activity"
+            options={{
+              headerShown: false,
             }}
           />
         </Stack>
