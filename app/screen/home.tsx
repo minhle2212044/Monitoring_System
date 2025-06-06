@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MenuBar from '../components/menubar';
 import axios from 'axios';
+import HeaderTitle from '../components/HeaderTitle';
 import { API_ENDPOINTS } from '../constants/api';
 
 type SensorItem = {
@@ -60,7 +61,7 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1 }}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Air Quality Dashboard</Text>
       </View>

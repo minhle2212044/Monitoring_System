@@ -10,8 +10,8 @@ export default function MenuBar() {
   const menuItems: { icon: string; route: string }[] = [
     { icon: 'home', route: '/screen/home' },
     { icon: 'line-chart', route: '/screen/activity' },
-    { icon: 'history', route: '/screen/login' },
-    { icon: 'user', route: '/screen/login' },
+    { icon: 'history', route: '/screen/history' },
+    { icon: 'user', route: '/screen/management' },
   ];
 
   return (

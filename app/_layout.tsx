@@ -48,6 +48,18 @@ export default function Layout() {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="screen/history"
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="screen/management"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
       </View>
   );
