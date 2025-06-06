@@ -65,6 +65,7 @@ model Notice {
 
 model Activity {
   id          Int       @id @default(autoincrement())
+  title       String    @default ("Hoạt động thể thao")
   suggestion  String
   priority    String
   temp_max    Float

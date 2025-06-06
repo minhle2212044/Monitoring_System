@@ -14,7 +14,7 @@ export class HistoryController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('page') page: number = 1,
-    @Query('pageSize') pageSize: number = 20,
+    @Query('pageSize') pageSize: number = 10,
   ) {
     return await this.historyService.getHistory({
       userId: Number(userId),

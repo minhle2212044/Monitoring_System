@@ -84,7 +84,7 @@ export class AuthService {
 
     await this.coreIotService.connectForUser(user.id);
     if (coreIotToken) {
-      await this.coreIotService.startPollingTelemetry(user.id, coreIotToken);
+      //await this.coreIotService.startPollingTelemetry(user.id, coreIotToken);
     }
     const token = await this.signToken(user.id, user.email);
     const refresh_token = await this.refreshToken(user.id, user.email);

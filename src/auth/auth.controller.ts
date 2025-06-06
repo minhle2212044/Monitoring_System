@@ -30,9 +30,10 @@ export class AuthController {
         return this.authService.signin(dto);
     }
 
-    @Post('signin')
+    @HttpCode(HttpStatus.OK)
+    @Post('signout')
     async signout(@Body('userId') userId: number) {
-        return this.authService.signout(userId);
+      return this.authService.signout(userId);
     }
 
     @HttpCode(HttpStatus.OK)

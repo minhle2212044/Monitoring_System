@@ -32,7 +32,7 @@ export class NoticeService {
 
   async createWarningNoticeIfNeeded(userId: number, key: string, value: number) {
     const thresholds = {
-      CO2: 2000,
+      CO2: 1500,
       PM25: 100,
       temperature: 38,
     };
